@@ -1,0 +1,506 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>My Budget</title>
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/tabler-icons/2.47.0/iconfont/tabler-icons.min.css">
+<style>
+  :root {
+    --color-background-primary: #ffffff;
+    --color-background-secondary: #f4f3f0;
+    --color-background-tertiary: #ebe9e4;
+    --color-background-success: #eaf3de;
+    --color-background-warning: #faeeda;
+    --color-background-danger: #fcebeb;
+    --color-text-primary: #2c2c2a;
+    --color-text-secondary: #5f5e5a;
+    --color-text-tertiary: #888780;
+    --color-text-success: #27500a;
+    --color-text-warning: #633806;
+    --color-text-danger: #791f1f;
+    --color-border-tertiary: rgba(44,44,42,0.15);
+    --color-border-secondary: rgba(44,44,42,0.3);
+    --border-radius-md: 8px;
+    --border-radius-lg: 12px;
+    --font-sans: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+  }
+  @media (prefers-color-scheme: dark) {
+    :root {
+      --color-background-primary: #1c1c1a;
+      --color-background-secondary: #282825;
+      --color-background-tertiary: #333330;
+      --color-background-success: #173404;
+      --color-background-warning: #412402;
+      --color-background-danger: #501313;
+      --color-text-primary: #f1efe8;
+      --color-text-secondary: #b4b2a9;
+      --color-text-tertiary: #888780;
+      --color-text-success: #c0dd97;
+      --color-text-warning: #fac775;
+      --color-text-danger: #f7c1c1;
+      --color-border-tertiary: rgba(241,239,232,0.15);
+      --color-border-secondary: rgba(241,239,232,0.3);
+    }
+  }
+  * { box-sizing: border-box; }
+  body {
+    margin: 0; padding: 24px 16px 60px;
+    font-family: var(--font-sans);
+    background: var(--color-background-tertiary);
+    color: var(--color-text-primary);
+  }
+  .app { max-width: 680px; margin: 0 auto; }
+  input[type="number"] {
+    height: 36px; border: 0.5px solid var(--color-border-tertiary);
+    border-radius: var(--border-radius-md); background: var(--color-background-primary);
+    color: var(--color-text-primary); font-size: 14px; padding: 0 10px; font-family: var(--font-sans);
+  }
+  input[type="number"]:focus { outline: none; box-shadow: 0 0 0 2px rgba(55,138,221,0.4); border-color: var(--color-border-secondary); }
+  button {
+    height: 36px; border: 0.5px solid var(--color-border-secondary);
+    border-radius: var(--border-radius-md); background: transparent;
+    color: var(--color-text-primary); font-size: 14px; cursor: pointer; font-family: var(--font-sans);
+  }
+  button:hover { background: var(--color-background-secondary); }
+  button:active { transform: scale(0.98); }
+  button.active { background: var(--color-background-secondary); font-weight: 500; }
+  .tabs { display: flex; gap: 8px; margin-bottom: 20px; }
+  .tabs button { flex: 1; padding: 10px 0; }
+  .card {
+    background: var(--color-background-primary); border: 0.5px solid var(--color-border-tertiary);
+    border-radius: var(--border-radius-lg); padding: 16px 20px; margin-bottom: 20px;
+  }
+  .row-between { display: flex; align-items: center; justify-content: space-between; }
+  .metric-grid { display: grid; grid-template-columns: repeat(3, minmax(0,1fr)); gap: 12px; }
+  .metric-grid.two { grid-template-columns: repeat(2, minmax(0,1fr)); }
+  .metric {
+    background: var(--color-background-secondary); border-radius: var(--border-radius-md); padding: 12px 16px;
+  }
+  .metric .label { font-size: 12px; color: var(--color-text-secondary); margin: 0 0 4px; }
+  .metric .value { font-size: 22px; font-weight: 500; margin: 0; }
+  .group-label { font-size: 13px; font-weight: 500; color: var(--color-text-secondary); margin: 0 0 8px; }
+  .list-card {
+    background: var(--color-background-primary); border: 0.5px solid var(--color-border-tertiary);
+    border-radius: var(--border-radius-lg); overflow: hidden; margin-bottom: 20px;
+  }
+  .list-row {
+    display: flex; align-items: center; justify-content: space-between;
+    padding: 10px 16px; border-bottom: 0.5px solid var(--color-border-tertiary);
+  }
+  .list-row:last-child { border-bottom: none; }
+  .cat-label { font-size: 14px; display: flex; align-items: center; }
+  .cat-label i { font-size: 16px; margin-right: 8px; color: var(--color-text-secondary); }
+  .input-dollar { display: flex; align-items: center; gap: 4px; }
+  .input-dollar span { font-size: 13px; color: var(--color-text-tertiary); }
+  .small-muted { font-size: 12px; color: var(--color-text-tertiary); margin: 2px 0 0; }
+  .progress { height: 5px; background: var(--color-background-secondary); border-radius: 3px; overflow: hidden; margin-top: 6px; }
+  .progress > div { height: 100%; transition: width 0.2s; }
+  .progress-bar-top { height: 8px; background: var(--color-background-secondary); border-radius: 4px; overflow: hidden; margin-bottom: 24px; }
+  .progress-bar-top > div { height: 100%; transition: width 0.2s; }
+  .month-switch { display: flex; align-items: center; justify-content: space-between; margin-bottom: 16px; }
+  .month-switch button { width: 36px; padding: 0; }
+  .month-switch p { font-weight: 500; font-size: 15px; margin: 0; }
+  .month-pills { display: flex; gap: 6px; overflow-x: auto; margin-bottom: 16px; padding-bottom: 2px; }
+  .month-pills button { font-size: 12px; padding: 4px 10px; height: 28px; white-space: nowrap; }
+  .save-status { font-size: 12px; color: var(--color-text-tertiary); }
+  .track-row-inputs { display: flex; align-items: baseline; gap: 6px; }
+  .track-actual { display: flex; align-items: center; gap: 4px; }
+  .track-actual input { width: 80px; text-align: right; }
+  .track-of-planned { font-size: 12px; color: var(--color-text-tertiary); }
+  .loading { padding: 40px; text-align: center; color: var(--color-text-secondary); font-size: 14px; }
+  .sr-only { position: absolute; width: 1px; height: 1px; overflow: hidden; }
+</style>
+</head>
+<body>
+<div class="app" id="app">
+  <div class="loading">Loading your budget…</div>
+</div>
+
+<script>
+const CATS = [
+  { key: "rent", label: "Rent", icon: "home", group: "Fixed" },
+  { key: "utilities", label: "Utilities", icon: "bolt", group: "Fixed" },
+  { key: "internet", label: "Internet", icon: "wifi", group: "Fixed" },
+  { key: "phone", label: "Phone", icon: "phone", group: "Fixed" },
+  { key: "loans", label: "Student loans", icon: "school", group: "Fixed" },
+  { key: "carInsurance", label: "Car insurance", icon: "car", group: "Fixed" },
+  { key: "gas", label: "Gas", icon: "gas-station", group: "Fixed" },
+  { key: "personal", label: "Personal care", icon: "sparkles", group: "Lifestyle" },
+  { key: "subscriptions", label: "Subscriptions", icon: "device-tv", group: "Lifestyle" },
+  { key: "entertainment", label: "Entertainment", icon: "glass-full", group: "Lifestyle" },
+  { key: "investing", label: "Investing (her own)", icon: "chart-line", group: "Future" },
+];
+
+const DEFAULT_PLAN = {
+  rent: 1300, utilities: 150, internet: 70, phone: 60, loans: 200,
+  carInsurance: 180, gas: 150, personal: 150, subscriptions: 40,
+  entertainment: 200, investing: 200,
+};
+
+const GROUPS = ["Fixed", "Lifestyle", "Future"];
+
+const FEDERAL_BRACKETS = [
+  { upTo: 57375, rate: 0.15 },
+  { upTo: 114750, rate: 0.205 },
+  { upTo: 177882, rate: 0.26 },
+  { upTo: 253414, rate: 0.29 },
+  { upTo: Infinity, rate: 0.33 },
+];
+const AB_BRACKETS = [
+  { upTo: 151234, rate: 0.10 },
+  { upTo: 181481, rate: 0.12 },
+  { upTo: 241974, rate: 0.13 },
+  { upTo: 362961, rate: 0.14 },
+  { upTo: Infinity, rate: 0.15 },
+];
+const FEDERAL_BPA = 16129;
+const AB_BPA = 22323;
+const CPP_RATE = 0.0595;
+const CPP_MAX_PENSIONABLE = 71300;
+const CPP_BASIC_EXEMPTION = 3500;
+const EI_RATE = 0.0164;
+const EI_MAX_INSURABLE = 65700;
+const CHILD_BENEFIT = 400;
+const STORAGE_KEY = "budget-app-state-v1";
+
+function taxFromBrackets(income, brackets, bpa) {
+  const taxable = Math.max(0, income - bpa);
+  let tax = 0, lower = 0;
+  for (const b of brackets) {
+    if (taxable <= lower) break;
+    const upper = Math.min(taxable, b.upTo);
+    tax += Math.max(0, upper - lower) * b.rate;
+    lower = b.upTo;
+  }
+  return tax;
+}
+
+function estimateNetAnnual(gross) {
+  const fedTax = taxFromBrackets(gross, FEDERAL_BRACKETS, FEDERAL_BPA);
+  const abTax = taxFromBrackets(gross, AB_BRACKETS, AB_BPA);
+  const cppBase = Math.max(0, Math.min(gross, CPP_MAX_PENSIONABLE) - CPP_BASIC_EXEMPTION);
+  const cpp = cppBase * CPP_RATE;
+  const ei = Math.min(gross, EI_MAX_INSURABLE) * EI_RATE;
+  const net = gross - fedTax - abTax - cpp - ei;
+  return { gross, fedTax, abTax, cpp, ei, net };
+}
+
+const fmt = (n) => "$" + Math.round(n).toLocaleString("en-CA");
+
+const monthKeyOf = (d) => `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, "0")}`;
+const monthLabel = (key) => {
+  const [y, m] = key.split("-").map(Number);
+  return new Date(y, m - 1, 1).toLocaleString("en-CA", { month: "long", year: "numeric" });
+};
+
+// ---- State ----
+let state = {
+  annualIncome: 60000,
+  plan: { ...DEFAULT_PLAN },
+  months: {},
+  activeMonth: monthKeyOf(new Date()),
+  view: "plan",
+};
+let saveTimer = null;
+
+function setSaveStatus(text) {
+  const el = document.getElementById("save-status");
+  if (el) el.textContent = text;
+}
+
+function persist() {
+  setSaveStatus("Saving…");
+  clearTimeout(saveTimer);
+  saveTimer = setTimeout(() => {
+    try {
+      localStorage.setItem(STORAGE_KEY, JSON.stringify({
+        annualIncome: state.annualIncome,
+        plan: state.plan,
+        months: state.months,
+      }));
+      setSaveStatus("Saved");
+    } catch (e) {
+      setSaveStatus("Error saving");
+    }
+  }, 500);
+}
+
+function loadState() {
+  try {
+    const raw = localStorage.getItem(STORAGE_KEY);
+    if (raw) {
+      const data = JSON.parse(raw);
+      if (data.annualIncome) state.annualIncome = data.annualIncome;
+      if (data.plan) state.plan = { ...DEFAULT_PLAN, ...data.plan };
+      if (data.months) state.months = data.months;
+    }
+  } catch (e) {
+    // no saved data yet
+  }
+  render();
+}
+
+function barColorSolid(planned, actual) {
+  if (actual === 0) return "var(--color-border-secondary)";
+  const ratio = actual / (planned || 1);
+  if (ratio <= 1) return "#639922";
+  if (ratio <= 1.1) return "#BA7517";
+  return "#E24B4A";
+}
+
+function getMonthData(key) {
+  return state.months[key] || { gross: null, actuals: {} };
+}
+
+function shiftMonth(dir) {
+  const [y, m] = state.activeMonth.split("-").map(Number);
+  const d = new Date(y, m - 1 + dir, 1);
+  state.activeMonth = monthKeyOf(d);
+  render();
+}
+
+function setActiveMonth(key) {
+  state.activeMonth = key;
+  render();
+}
+
+function setView(v) {
+  state.view = v;
+  render();
+}
+
+function updatePlanField(key, val) {
+  state.plan[key] = val === "" ? 0 : Number(val);
+  persist();
+  renderQuiet();
+}
+
+function updateActualField(key, val) {
+  const m = getMonthData(state.activeMonth);
+  m.actuals = { ...(m.actuals || {}), [key]: val === "" ? 0 : Number(val) };
+  state.months[state.activeMonth] = m;
+  persist();
+  renderQuiet();
+}
+
+function updateMonthGross(val) {
+  const m = getMonthData(state.activeMonth);
+  m.gross = val === "" ? null : Number(val);
+  state.months[state.activeMonth] = m;
+  persist();
+  render();
+}
+
+function updateAnnualIncome(val) {
+  state.annualIncome = Number(val) || 0;
+  persist();
+  render();
+}
+
+// Re-render without losing focus on the field currently being typed in
+function renderQuiet() {
+  const active = document.activeElement;
+  const activeKey = active && active.dataset ? active.dataset.key : null;
+  const selStart = active ? active.selectionStart : null;
+  render();
+  if (activeKey) {
+    const el = document.querySelector(`input[data-key="${activeKey}"]`);
+    if (el) {
+      el.focus();
+      try { el.setSelectionRange(selStart, selStart); } catch (e) {}
+    }
+  }
+}
+
+function icon(name) {
+  return `<i class="ti ti-${name}" aria-hidden="true"></i>`;
+}
+
+function renderIncomeCard() {
+  const baseTax = estimateNetAnnual(state.annualIncome);
+  const baseMonthlyNet = baseTax.net / 12;
+  return `
+    <div class="card">
+      <div class="row-between" style="margin-bottom:12px;">
+        <p style="font-weight:500;font-size:15px;margin:0;">${icon("wallet")} Income</p>
+        <span class="save-status" id="save-status"></span>
+      </div>
+      <div style="display:flex;align-items:center;gap:10px;margin-bottom:10px;">
+        <label style="font-size:13px;color:var(--color-text-secondary);min-width:140px;">Average annual salary</label>
+        <span style="font-size:13px;color:var(--color-text-tertiary);">$</span>
+        <input type="number" id="annual-income" value="${state.annualIncome}" step="500" style="width:110px;">
+      </div>
+      <div class="metric-grid two">
+        <div class="metric">
+          <p class="label">Estimated take-home / month</p>
+          <p class="value">${fmt(baseMonthlyNet)}</p>
+        </div>
+        <div class="metric">
+          <p class="label">After tax this year</p>
+          <p class="value">${fmt(baseTax.net)}</p>
+        </div>
+      </div>
+      <p class="small-muted" style="margin-top:10px;">Estimated using 2025 Alberta + federal tax brackets, CPP and EI. Actual take-home may vary slightly with pay-period deductions.</p>
+      <div style="border-top:0.5px solid var(--color-border-tertiary);margin-top:14px;padding-top:12px;">
+        <div class="row-between">
+          <div>
+            <p style="font-size:13px;font-weight:500;margin:0;">${icon("heart-handshake")} Child benefit (2 girls)</p>
+            <p class="small-muted">$200 × 2 — sent to dad for RESP</p>
+          </div>
+          <p style="font-size:15px;font-weight:500;margin:0;color:var(--color-text-tertiary);">${fmt(CHILD_BENEFIT)} ${icon("arrow-right")}</p>
+        </div>
+      </div>
+    </div>
+  `;
+}
+
+function renderPlanView() {
+  const totalPlanned = CATS.reduce((s, c) => s + (Number(state.plan[c.key]) || 0), 0);
+  const baseTax = estimateNetAnnual(state.annualIncome);
+  const netIncome = baseTax.net / 12;
+  const leftover = netIncome - totalPlanned;
+
+  let html = `
+    <div class="metric-grid" style="margin-bottom:20px;">
+      <div class="metric"><p class="label">Net income</p><p class="value">${fmt(netIncome)}</p></div>
+      <div class="metric"><p class="label">Budgeted</p><p class="value">${fmt(totalPlanned)}</p></div>
+      <div class="metric"><p class="label">${leftover >= 0 ? "Left over" : "Over budget"}</p>
+        <p class="value" style="color:${leftover >= 0 ? "var(--color-text-success)" : "var(--color-text-danger)"};">${fmt(Math.abs(leftover))}</p>
+      </div>
+    </div>
+  `;
+
+  GROUPS.forEach((g) => {
+    html += `<p class="group-label">${g}</p><div class="list-card">`;
+    CATS.filter((c) => c.group === g).forEach((c) => {
+      html += `
+        <div class="list-row">
+          <span class="cat-label">${icon(c.icon)} ${c.label}</span>
+          <div class="input-dollar">
+            <span>$</span>
+            <input type="number" data-key="plan-${c.key}" value="${state.plan[c.key]}" step="10" style="width:90px;text-align:right;"
+              onchange="updatePlanField('${c.key}', this.value)" oninput="updatePlanField('${c.key}', this.value)">
+          </div>
+        </div>
+      `;
+    });
+    html += `</div>`;
+  });
+
+  return html;
+}
+
+function renderTrackView() {
+  const monthData = getMonthData(state.activeMonth);
+  const baselineMonthlyGross = state.annualIncome / 12;
+  const hasOverride = monthData.gross != null;
+  const monthGross = monthData.gross ?? baselineMonthlyGross;
+  const monthTax = estimateNetAnnual(monthGross * 12);
+  const netIncome = monthTax.net / 12;
+  const actuals = monthData.actuals || {};
+
+  const totalPlanned = CATS.reduce((s, c) => s + (Number(state.plan[c.key]) || 0), 0);
+  const totalActual = CATS.reduce((s, c) => s + (Number(actuals[c.key]) || 0), 0);
+  const leftover = netIncome - totalActual;
+  const pct = Math.min(150, (totalActual / (netIncome || 1)) * 100);
+
+  const keys = new Set(Object.keys(state.months));
+  keys.add(state.activeMonth);
+  const sortedKeys = Array.from(keys).sort();
+
+  let html = `
+    <div class="month-switch">
+      <button aria-label="Previous month" onclick="shiftMonth(-1)">${icon("chevron-left")}</button>
+      <p>${monthLabel(state.activeMonth)}</p>
+      <button aria-label="Next month" onclick="shiftMonth(1)">${icon("chevron-right")}</button>
+    </div>
+  `;
+
+  if (sortedKeys.length > 1) {
+    html += `<div class="month-pills">`;
+    sortedKeys.forEach((k) => {
+      html += `<button class="${k === state.activeMonth ? "active" : ""}" onclick="setActiveMonth('${k}')">${monthLabel(k).split(" ")[0].slice(0, 3)}</button>`;
+    });
+    html += `</div>`;
+  }
+
+  html += `
+    <div class="card" style="display:flex;align-items:center;justify-content:space-between;gap:12px;padding:12px 16px;">
+      <div>
+        <p style="font-size:13px;font-weight:500;margin:0;">This month's pay</p>
+        <p class="small-muted">${hasOverride ? "Custom amount entered" : "Using your average"}</p>
+      </div>
+      <div class="input-dollar">
+        <span>$</span>
+        <input type="number" placeholder="${Math.round(baselineMonthlyGross)}" value="${hasOverride ? monthGross : ""}"
+          style="width:100px;text-align:right;" data-key="month-gross"
+          onchange="updateMonthGross(this.value)" oninput="updateMonthGross(this.value)">
+      </div>
+    </div>
+
+    <div class="metric-grid" style="margin-bottom:8px;">
+      <div class="metric"><p class="label">Take-home</p><p class="value">${fmt(netIncome)}</p></div>
+      <div class="metric"><p class="label">Spent so far</p><p class="value">${fmt(totalActual)}</p></div>
+      <div class="metric"><p class="label">${leftover >= 0 ? "Left to spend" : "Over"}</p>
+        <p class="value" style="color:${leftover >= 0 ? "var(--color-text-success)" : "var(--color-text-danger)"};">${fmt(Math.abs(leftover))}</p>
+      </div>
+    </div>
+
+    <div class="progress-bar-top"><div style="width:${pct}%;background:${leftover >= 0 ? "#639922" : "#E24B4A"};"></div></div>
+  `;
+
+  GROUPS.forEach((g) => {
+    html += `<p class="group-label">${g}</p><div class="list-card">`;
+    CATS.filter((c) => c.group === g).forEach((c) => {
+      const planned = Number(state.plan[c.key]) || 0;
+      const actual = Number(actuals[c.key]) || 0;
+      const ratio = planned > 0 ? Math.min(1, actual / planned) : actual > 0 ? 1 : 0;
+      html += `
+        <div class="list-row" style="flex-direction:column;align-items:stretch;">
+          <div class="row-between" style="margin-bottom:6px;">
+            <span class="cat-label">${icon(c.icon)} ${c.label}</span>
+            <div class="track-row-inputs">
+              <div class="track-actual">
+                <span style="font-size:13px;color:var(--color-text-tertiary);">$</span>
+                <input type="number" data-key="actual-${c.key}" value="${actuals[c.key] ?? ""}" placeholder="0" step="5"
+                  onchange="updateActualField('${c.key}', this.value)" oninput="updateActualField('${c.key}', this.value)">
+              </div>
+              <span class="track-of-planned">/ ${fmt(planned)}</span>
+            </div>
+          </div>
+          <div class="progress"><div style="width:${ratio * 100}%;background:${barColorSolid(planned, actual)};"></div></div>
+        </div>
+      `;
+    });
+    html += `</div>`;
+  });
+
+  return html;
+}
+
+function render() {
+  const app = document.getElementById("app");
+  app.innerHTML = `
+    <h2 class="sr-only">Personal budget planner and monthly expense tracker with Alberta tax-adjusted income</h2>
+    <div class="tabs">
+      <button class="${state.view === "plan" ? "active" : ""}" onclick="setView('plan')">${icon("target-arrow")} Budget plan</button>
+      <button class="${state.view === "track" ? "active" : ""}" onclick="setView('track')">${icon("calendar-stats")} Track my month</button>
+    </div>
+    ${renderIncomeCard()}
+    <div id="view-content"></div>
+  `;
+  document.getElementById("view-content").innerHTML = state.view === "plan" ? renderPlanView() : renderTrackView();
+
+  const incomeInput = document.getElementById("annual-income");
+  if (incomeInput) {
+    incomeInput.onchange = (e) => updateAnnualIncome(e.target.value);
+    incomeInput.oninput = (e) => updateAnnualIncome(e.target.value);
+  }
+  setSaveStatus("Saved");
+}
+
+loadState();
+</script>
+</body>
+</html>
