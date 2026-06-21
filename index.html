@@ -212,31 +212,40 @@ function setSaveStatus(text) {
 function persist() {
   setSaveStatus("Saving…");
   clearTimeout(saveTimer);
-  saveTimer = setTimeout(() => {
+  saveTimer = setTimeout(async () => {
     try {
-      localStorage.setItem(STORAGE_KEY, JSON.stringify({
-        annualIncome: state.annualIncome,
-        plan: state.plan,
-        months: state.months,
-      }));
-      setSaveStatus("Saved");
+      const res = await fetch("/api/set", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          value: JSON.stringify({
+            annualIncome: state.annualIncome,
+            plan: state.plan,
+            months: state.months,
+          }),
+        }),
+      });
+      setSaveStatus(res.ok ? "Saved" : "Error saving");
     } catch (e) {
       setSaveStatus("Error saving");
     }
   }, 500);
 }
 
-function loadState() {
+async function loadState() {
   try {
-    const raw = localStorage.getItem(STORAGE_KEY);
-    if (raw) {
-      const data = JSON.parse(raw);
-      if (data.annualIncome) state.annualIncome = data.annualIncome;
-      if (data.plan) state.plan = { ...DEFAULT_PLAN, ...data.plan };
-      if (data.months) state.months = data.months;
+    const res = await fetch("/api/get");
+    if (res.ok) {
+      const { value } = await res.json();
+      if (value) {
+        const data = JSON.parse(value);
+        if (data.annualIncome) state.annualIncome = data.annualIncome;
+        if (data.plan) state.plan = { ...DEFAULT_PLAN, ...data.plan };
+        if (data.months) state.months = data.months;
+      }
     }
   } catch (e) {
-    // no saved data yet
+    // use defaults
   }
   render();
 }
